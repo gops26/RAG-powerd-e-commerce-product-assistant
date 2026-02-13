@@ -73,12 +73,14 @@ body {
 
 .chat-message--user .chat-message-content {
   background: #093154;
+  color: #90caf9;
   padding: 0.75rem 1rem;
   border-radius: 12px 12px 4px 12px;
 }
 
 .chat-message--assistant .chat-message-content {
   background: #10528c;
+  color: #90caf9;
   padding: 0.75rem 1rem;
   border-radius: 12px 12px 12px 4px;
 }
