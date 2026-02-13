@@ -42,10 +42,10 @@ def rerank(question, chunks):
         you are a systematic document reranker.
         you're provided with a question and a list of relevant chunks of text from a query of a knowledge base The chunks are provided in the order they were retrieved; It should be reranked approximately by relevance to the question, With the most relevant chunk first. Reply only with the list of ranked chunk ids nothing else. Include all chunk ids you are provided with, reranked
     """
-    user_prompt += f"The User has asked the following question:\n\n{question}\n\nOrder all the chunks of text Buy relevance to that question from most relevant to least relevant, include all the junk IDS you're provided with, re ranked."
+    user_prompt = f"The User has asked the following question:\n\n{question}\n\nOrder all the chunks of text Buy relevance to that question from most relevant to least relevant, include all the junk IDS you're provided with, re ranked."
     user_prompt+= "Here are the chunks\n\n"
     for index,chunk in enumerate(chunks):
-        user_prompt+= f"Chunk Id; {index + 1}:\n\n"
+        user_prompt += f"Chunk Id {index + 1}:\n\n{chunk.page_content}\n\n"
     user_prompt += "Reply only with the list of ranked chunk ids, Nothing else."
 
     messages = [
@@ -54,7 +54,7 @@ def rerank(question, chunks):
 
     ]
     reply = llm.with_structured_output(RankOrder).invoke(messages)
-    order = RankOrder.model_validate_json(reply).order
+    order = reply.order
     return [chunks[i-1] for i in order]
     
 
