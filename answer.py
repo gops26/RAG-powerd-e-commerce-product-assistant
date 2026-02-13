@@ -1,4 +1,5 @@
 from chromadb import PersistentClient
+from pydantic import BaseModel,Field
 from ingest import (
     DB_NAME,
     COLLECTION_NAME,
@@ -31,6 +32,33 @@ Your answers will be evaluated for accuracy relevance and completeness so make s
 the conversation you make with user should be more engaging, make the product  more interesting to the user.
 """
 
+class RankOrder(BaseModel):
+    order: list[int] = Field(
+        description ="The order of relevance of chunks of text, from most relevant to least relevant , by chunk id number"
+    )
+
+def rerank(question, chunks):
+    system_prompt = """
+        you are a systematic document reranker.
+        you're provided with a question and a list of relevant chunks of text from a query of a knowledge base The chunks are provided in the order they were retrieved; It should be reranked approximately by relevance to the question, With the most relevant chunk first. Reply only with the list of ranked chunk ids nothing else. Include all chunk ids you are provided with, reranked
+    """
+    user_prompt += f"The User has asked the following question:\n\n{question}\n\nOrder all the chunks of text Buy relevance to that question from most relevant to least relevant, include all the junk IDS you're provided with, re ranked."
+    user_prompt+= "Here are the chunks\n\n"
+    for index,chunk in enumerate(chunks):
+        user_prompt+= f"Chunk Id; {index + 1}:\n\n"
+    user_prompt += "Reply only with the list of ranked chunk ids, Nothing else."
+
+    messages = [
+        {"role":"system", "content": system_prompt},
+        {"role":"user", "content": user_prompt}
+
+    ]
+    reply = llm.with_structured_output(RankOrder).invoke(messages)
+    order = RankOrder.model_validate_json(reply).order
+    return [chunks[i-1] for i in order]
+    
+
+
 def make_rag_messages(question, history, chunks):
     context = "\n\n".join(
         f"Extract from {chunk.metadata["source"]}:\n{chunk.page_content}" for   chunk in chunks
@@ -60,13 +88,20 @@ def fetch_context(question):
 
     return chunks
 
+def fetch_reranked_context(question:str):
+    chunks = fetch_context(question)
+    reranked_chunks = rerank(question,chunks=chunks)
+    return reranked_chunks
+
+
 def answer_question(question:str, history: list[dict]= []) -> tuple[str,list]:
     """
     Answer the question using rag and return the answer and retrieved context
     """
     
-    chunks = fetch_context(question)
+    chunks = fetch_reranked_context(question)
     messages = make_rag_messages(question, history, chunks)
     response = llm.invoke(messages)
     return response.content, chunks
 
+ 
