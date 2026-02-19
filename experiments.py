@@ -1,12 +1,19 @@
 from sarvamai import SarvamAI
 import json
 import os
+import requests
+from litellm import completion
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 load_dotenv()
 
 api_key = os.environ["SARVAM"]
+
+class Product(BaseModel):
+    title:str = Field(description="a breif title for the product citing the name of the product")
+    description:str = Field(description="a breif description about the product")
+    price:int = Field(description="a reasonable price of the product")
 
 
 class Chunk(BaseModel):
@@ -47,3 +54,16 @@ def get_response(messages) -> Chunks:
     return Chunks.model_validate_json(raw)
 
 
+
+client = SarvamAI(api_subscription_key=api_key)
+
+messages = [
+    
+    {"role":"user", "content":"generate 100 product data"}
+    ]
+response = client.chat.completions( messages =messages)
+
+print(response)
+print()
+print()
+print(response["choices"][0]["message"]["content"])
