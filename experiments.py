@@ -1,4 +1,4 @@
-import requests
+from sarvamai import SarvamAI
 import json
 import os
 from dotenv import load_dotenv
@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-api_key = os.environ["OPEN_ROUTER"]
+api_key = os.environ["SARVAM"]
 
 
 class Chunk(BaseModel):
