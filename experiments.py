@@ -104,7 +104,7 @@ res1 = chain.invoke({
 class ProductLoader:
 
     def __init__(self, llm:ChatOpenAI, parser:PydanticOutputParser):
-        self.n_products = 15
+        self.n_products = 30
         self.llm = llm
         self.parser= parser
         self.message_store: list[Product] = []
@@ -116,7 +116,7 @@ class ProductLoader:
     @staticmethod
     def load_prompt():
         return ChatPromptTemplate.from_messages([
-            ("system", "You are a helpful assistant. Respond only with valid JSON that matches the required format.\n{format_instructions}"),
+            ("system", "You are a helpful assistant creating products to the customer.You are needed to create ```products``` on user's request. Do Not Create Same products repeatedly.  Respond only with valid JSON that matches the required format.\n{format_instructions}"),
             ("human", "{input}"),
         ])
     
