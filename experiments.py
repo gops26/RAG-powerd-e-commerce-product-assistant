@@ -34,47 +34,12 @@ class Chunks(BaseModel):
     chunks: list[Chunk]
 
 
-def get_response(messages) -> Chunks:
-    response = requests.post(
-        url="https://openrouter.ai/api/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "anthropic/claude-instant-1.1",
-            "messages":messages,
-            "response_format": {
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "Chunks",
-                    "strict": True,
-                    "schema": Chunks.model_json_schema()
-                }
-            }
-        }
-    )
-
-    data = response.json()
-    if "error" in data:
-        raise RuntimeError(f"API error: {data['error']}")
-    raw = data["choices"][0]["message"]["content"]
-    return Chunks.model_validate_json(raw)
-
-
-
-# client = SarvamAI(api_subscription_key=api_key)
 
 messages = [
     
     {"role":"user", "content":"generate 1 product data"}
     ]
-# response = client.chat.completions( messages =messages)
 
-# print(response)
-# print()
-# print()
-# print(response["choices"][0]["message"]["content"])
 
 llm = ChatOpenAI(
     base_url = "https://api.sarvam.ai/v1",
@@ -82,22 +47,16 @@ llm = ChatOpenAI(
     model="sarvam-m",
 )
 
-parser = PydanticOutputParser(pydantic_object=Product)
+parser = PydanticOutputParser(pydantic_object=Chunks)
 
 prompt = ChatPromptTemplate.from_messages([
     ("system", "You are a helpful assistant. Respond only with valid JSON that matches the required format.\n{format_instructions}"),
-    ("human", "{input}"),
 ])
 
 chain = prompt | llm | parser
 
-res = chain.invoke({
-    "input": "generate 1 product data",
-    "format_instructions": parser.get_format_instructions(),
-})
+def get_response(messages):
+    return chain.invoke(messages)
 
-res1 = chain.invoke({
-    "input": "generate 1 product data",
-    "format_instructions": parser.get_format_instructions(),
-})
+
 

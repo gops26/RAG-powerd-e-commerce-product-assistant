@@ -6,9 +6,7 @@ from chromadb import PersistentClient
 from tqdm import tqdm
 from experiments import get_response
 from pydantic import BaseModel,Field
-import os
 
-load_dotenv() 
 
 MODEL = "llama-3.1-8b-instant"
 MODEL_EMBED = "snowflake-arctic-embed:335m"
@@ -16,11 +14,8 @@ DB_NAME = "vector_db"
 COLLECTION_NAME = "docs"
 RETRIEVAL_N = 10
 RERANK_TOP_K = 4
-API_TOKEN = os.environ["GROQ"]
 AVG_CHUNK_SIZE = 40
 
-llm = ChatGroq(model=MODEL, api_key=API_TOKEN, timeout=5.0,
-    max_retries=10,)
 
 llm = ChatOllama(model="llama3.2:latest")
 
@@ -80,7 +75,7 @@ def process2_document(document):
 def create_chunks(documents):
     chunks = []
     for doc in tqdm(documents):
-        result = process_document(doc)
+        result = process2_document(doc)
         for chunk in result.chunks:
             chunks.append(chunk.as_result(doc))
     return chunks
