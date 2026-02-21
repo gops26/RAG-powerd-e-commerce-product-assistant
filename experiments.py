@@ -23,12 +23,18 @@ class Product(BaseModel):
             return v[0]
         return v
 
-
+class Result(BaseModel):
+    page_content: str
+    metadata: dict
+    
 class Chunk(BaseModel):
     title: str = Field(description="A brief title for this chunk of product, typically 3,4 words that is most likely surfaced in a query")
     summary: str = Field(description="A few sentence summarizing the chunk about the product to answer questions")
     original_text: str = Field(description="The original text of this chunk from the provided document, exactly as is, not changed in any way")
 
+    def as_result(self, document):
+        metadata = {"source": document.metadata.get("id", ""), "type": document.metadata.get("category", "")}
+        return Result(page_content=self.title + "\n\n" + self.summary +  "\n\n" + self.original_text,metadata=metadata)
 
 class Chunks(BaseModel):
     chunks: list[Chunk]
@@ -51,12 +57,14 @@ parser = PydanticOutputParser(pydantic_object=Chunks)
 
 prompt = ChatPromptTemplate.from_messages([
     ("system", "You are a helpful assistant. Respond only with valid JSON that matches the required format.\n{format_instructions}"),
-])
+    ("human", "{user_message}"),
+]).partial(format_instructions=parser.get_format_instructions())
 
 chain = prompt | llm | parser
 
 def get_response(messages):
-    return chain.invoke(messages)
+    user_content = messages[-1]["content"] if messages else ""
+    return chain.invoke({"user_message": user_content})
 
 
 

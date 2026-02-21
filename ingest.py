@@ -73,11 +73,16 @@ def process2_document(document):
     return response
 
 def create_chunks(documents):
+
     chunks = []
     for doc in tqdm(documents):
-        result = process2_document(doc)
-        for chunk in result.chunks:
-            chunks.append(chunk.as_result(doc))
+        try:
+            result = process2_document(doc)
+            for chunk in result.chunks:
+                chunks.append(chunk.as_result(doc))
+        except Exception:
+            print("skipped document")
+            continue
     return chunks
 
 
@@ -101,9 +106,8 @@ def create_embeddings(chunks):
 
 
 if __name__ == "__main__":
-    chunks = create_chunks(documents=documents[:3])
-    print('created 4 chunks ....')
-    time.sleep(50.0)
-    chunks.extend(create_chunks(documents=documents[4:9]))
+    chunks = create_chunks(documents=documents)
+    print('created 100 chunks ....')
+    
     create_embeddings(chunks)
-    print('created 6 chunks ....')
+    print('created embeddings ....')
