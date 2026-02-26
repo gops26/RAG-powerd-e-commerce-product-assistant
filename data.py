@@ -15,7 +15,7 @@ def load_jsonl(filepath):
     return data
     
 
-KNOWLEDGE_FILE_PATH = "C:/Users/Gopinath/Desktop/productrag/knowledge-base"
+KNOWLEDGE_FILE_PATH = "./knowledge-base"
 
 data = []
 for file in Path(KNOWLEDGE_FILE_PATH).iterdir():
