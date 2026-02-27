@@ -104,4 +104,15 @@ def answer_question(question:str, history: list[dict]= []) -> tuple[str,list]:
     response = llm.invoke(messages)
     return response.content, chunks
 
+
+def answer_question_normal_reranked(question:str, history: list[dict]= []) -> tuple[str,list]:
+    """
+    Answer the question using rag and return the answer and retrieved context
+    """
+    
+    chunks = fetch_context(question)
+    messages = make_rag_messages(question, history, chunks)
+    response = llm.invoke(messages)
+    return response.content, chunks
+
  

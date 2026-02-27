@@ -4,11 +4,10 @@ from langchain_groq import ChatGroq
 from langchain_ollama import OllamaEmbeddings,ChatOllama
 from chromadb import PersistentClient
 from tqdm import tqdm
-from experiments import get_response
 from pydantic import BaseModel,Field
 
 
-MODEL = "llama-3.1-8b-instant"
+MODEL = "deepseek-r1:1.5b"
 MODEL_EMBED = "snowflake-arctic-embed:335m"
 DB_NAME = "vector_db"
 COLLECTION_NAME = "docs"
@@ -67,17 +66,13 @@ def process_document(document):
     time.sleep(4)
     return response
 
-def process2_document(document):
-    messages = create_messages(document)
-    response = get_response(messages)
-    return response
 
 def create_chunks(documents):
 
     chunks = []
     for doc in tqdm(documents):
         try:
-            result = process2_document(doc)
+            result = process_document(doc)
             for chunk in result.chunks:
                 chunks.append(chunk.as_result(doc))
         except Exception:
