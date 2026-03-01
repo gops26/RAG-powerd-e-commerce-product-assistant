@@ -116,3 +116,7 @@ productrag/
 ```
 
 returns the answer + retrieved context chunks.
+
+## App screen shot
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/67fe7206-7382-4da5-a84c-e78f7935d6f3" />
+
