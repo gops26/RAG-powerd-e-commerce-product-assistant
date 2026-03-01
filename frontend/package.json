@@ -36,7 +36,9 @@
     "vite": "^7.3.1",
     "yallist": "^3.1.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.4"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
