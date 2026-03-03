@@ -5,8 +5,7 @@ langchain_chroma
 langchain_groq
 langchain_ollama
 langchain_openai
-langchain_elasticsearch
-elasticsearch
+langchain_pinecone
 dotenv
 fastapi
 uvicorn

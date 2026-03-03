@@ -6,11 +6,14 @@ from ingest import (
     MODEL,
     MODEL_EMBED,
     RERANK_TOP_K,
+    RERANK_MODEL,
     RETRIEVAL_N,
     Result)
 
 from data import KNOWLEDGE_FILE_PATH
 from langchain_ollama import ChatOllama, OllamaEmbeddings
+from langchain.retrievers import ContextualCompressionRetriever
+from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 
 llm = ChatOllama(model="llama3.2:latest")
 
@@ -42,6 +45,7 @@ def rerank(question, chunks):
         you are a systematic document reranker.
         you're provided with a question and a list of relevant chunks of text from a query of a knowledge base The chunks are provided in the order they were retrieved; It should be reranked approximately by relevance to the question, With the most relevant chunk first. Reply only with the list of ranked chunk ids nothing else. Include all chunk ids you are provided with, reranked
     """
+    
     user_prompt = f"The User has asked the following question:\n\n{question}\n\nOrder all the chunks of text Buy relevance to that question from most relevant to least relevant, include all the junk IDS you're provided with, re ranked."
     user_prompt+= "Here are the chunks\n\n"
     for index,chunk in enumerate(chunks):
@@ -93,13 +97,24 @@ def fetch_reranked_context(question:str):
     reranked_chunks = rerank(question,chunks=chunks)
     return reranked_chunks
 
+def rerank_bge(question: str, chunks: list) -> list:
+    documents = [chunk.page_content for chunk in chunks]
+
+    model = HuggingFaceCrossEncoder(model="BAAI/bge-reranker-base")
+    compressor = CrossEn
+    ranked = sorted(results, key=lambda r: r["relevance_score"], reverse=True)
+    return [chunks[r["index"]] for r in ranked][:RERANK_TOP_K]
+
+def fetch_bge_reranked_context(question: str) -> list:
+    chunks = fetch_context(question)
+    return rerank_bge(question, chunks)
 
 def answer_question(question:str, history: list[dict]= []) -> tuple[str,list]:
     """
     Answer the question using rag and return the answer and retrieved context
     """
     
-    chunks = fetch_reranked_context(question)
+    chunks = fetch_bge_reranked_context(question)
     messages = make_rag_messages(question, history, chunks)
     response = llm.invoke(messages)
     return response.content, chunks
