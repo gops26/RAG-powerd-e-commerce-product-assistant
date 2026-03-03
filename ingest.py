@@ -5,6 +5,8 @@ from langchain_ollama import OllamaEmbeddings,ChatOllama
 from chromadb import PersistentClient
 from tqdm import tqdm
 from pydantic import BaseModel,Field
+from langchain_community.retrievers import PineconeHybridSearchRetriever
+from pinecone import Pinecone,ServerlessSpec
 
 
 MODEL = "deepseek-r1:1.5b"
@@ -13,6 +15,7 @@ DB_NAME = "vector_db"
 COLLECTION_NAME = "docs"
 RETRIEVAL_N = 10
 RERANK_TOP_K = 4
+RERANK_MODEL = "qllama/bge-reranker-v2-m3:latest"
 AVG_CHUNK_SIZE = 40
 
 
